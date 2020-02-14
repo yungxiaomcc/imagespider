@@ -10,12 +10,13 @@ from pprint import pprint
 from queue import Queue
 import threading
 import multiprocessing
+from concurrent.futures import ProcessPoolExecutor, as_completed
 # 请求url 每次请求的图片数量
 URL_PARAM_RN = 50
 # 启用进程数量
-MAX_PROCESS_NUMBER=6
-MULTIKEY=True
-SAVE_PAHT_PREFIX='./菜系/'
+MAX_PROCESS_NUMBER=10
+MULTIKEY=False
+SAVE_PAHT_PREFIX='/Volumes/Data3/'
 
 def parse_excel(excel_path,sheet_name='',sheet_index=0):
     '''
@@ -126,19 +127,26 @@ if __name__ == '__main__':
     #          ]
     # for name in items:
     #     downloader('川菜/'+name, image_count=500)
-    crawl_info = parse_excel('./data.xlsx',sheet_name='菜系')
+    crawl_info = parse_excel('./data.xlsx',sheet_name='杂类')
     # print('-------------')
     # print(crawl_info[0][1])
 
     # 创建进程池
-    po = multiprocessing.Pool(MAX_PROCESS_NUMBER)
-    while(len(crawl_info)!=0):
-        po.apply_async(downloader, tuple(crawl_info.pop()))
+    # po = multiprocessing.Pool(MAX_PROCESS_NUMBER)
+    # while(len(crawl_info)!=0):
+    #     po.apply_async(downloader, tuple(crawl_info.pop()))
 
-    print("-----start-----")
-    po.close() # 关闭进程池，关闭后po不再接收新的请求
-    po.join() # 等待po中所有子进程执行完成，必须放在close语句之后
-    print("-----end-----")
+    # print("-----start-----")
+    # po.close() # 关闭进程池，关闭后po不再接收新的请求
+    # po.join() # 等待po中所有子进程执行完成，必须放在close语句之后
+    # print("-----end-----")
+    future_list = list()
+    with ProcessPoolExecutor(max_workers=MAX_PROCESS_NUMBER) as executor:
+        while(len(crawl_info)!=0):
+           future_list.append(executor.submit(downloader,*crawl_info.pop())) 
+        for res in tqdm(as_completed(future_list),desc='下载图片中...'): #这个futrure_list是你future对象的列表
+            print(res.result())  
+
 
 
 
