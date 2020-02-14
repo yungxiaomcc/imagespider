@@ -11,6 +11,7 @@ import pandas as pd
 from tqdm import tqdm
 import multiprocessing
 import os
+from selenium.webdriver.chrome.options import Options
 '''
 必应版本
 '''
@@ -35,7 +36,6 @@ def parse_excel(excel_path,sheet_name='',sheet_index=0):
     for indexs in dataframe.index:
         result.append(list(dataframe.loc[indexs]))
     return result
-
 
 def request_handler(url,save_path,index):
     headers = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1" }
@@ -75,8 +75,12 @@ def thread_handler(imageurl_list,key_word,path_prefix):
         print(res.result())  
 
 def downloader(key_word, image_count, path_prefix):
-
-    browser = webdriver.Chrome()
+    chrome_options = Options()
+    chrome_options.add_argument('--no-sandbox')#解决DevToolsActivePort文件不存在的报错
+    chrome_options.add_argument('--disable-gpu') #谷歌文档提到需要加上这个属性来规避bug
+    chrome_options.add_argument('--headless') #浏览器不提供可视化页面. linux下如果系统不支持可视化不加这条会启动失败
+    chrome_options.binary_location = r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" #手动指定使用的浏览器位置
+    browser = webdriver.Chrome(chrome_options=chrome_options)
     url='https://cn.bing.com/images/trending?FORM=BESBTB&ensearch=1'
     browser.get(url)
     browser.find_element_by_id("sb_form_q").send_keys(key_word)

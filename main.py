@@ -13,8 +13,9 @@ import multiprocessing
 # 请求url 每次请求的图片数量
 URL_PARAM_RN = 50
 # 启用进程数量
-MAX_PROCESS_NUMBER=9
+MAX_PROCESS_NUMBER=6
 MULTIKEY=True
+SAVE_PAHT_PREFIX='./菜系/'
 
 def parse_excel(excel_path,sheet_name='',sheet_index=0):
     '''
@@ -74,11 +75,11 @@ def downloader(key_word, image_count, path_prefix):
     # 创建存放的目录
     save_path = ''
     if path_prefix=='None':
-        save_path='./'+key_word
+        save_path=SAVE_PAHT_PREFIX+key_word
         if not os.path.exists(save_path):
             os.mkdir(save_path)
     else:
-        save_path='./'+path_prefix+'/'+key_word
+        save_path=SAVE_PAHT_PREFIX+path_prefix+'/'+key_word
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
@@ -125,7 +126,7 @@ if __name__ == '__main__':
     #          ]
     # for name in items:
     #     downloader('川菜/'+name, image_count=500)
-    crawl_info = parse_excel('./data.xlsx',sheet_name='吃播')
+    crawl_info = parse_excel('./data.xlsx',sheet_name='菜系')
     # print('-------------')
     # print(crawl_info[0][1])
 
